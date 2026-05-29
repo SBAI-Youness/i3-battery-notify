@@ -1,113 +1,67 @@
-# i3 Battery Notify
+# i3-battery-notify
 
-Simple Bash script that sends a **desktop notification when battery is
-low**.
+A simple Bash script that sends a critical desktop notification when your battery drops below 20% while discharging. Built for minimal Linux setups like i3wm where no power daemon is running.
 
-Designed for **minimal Linux setups** like **i3wm** where no battery
-daemon is running.
-
-The script checks battery level every **2 minutes** and sends a
-**critical notification** when it drops below **20% while discharging**.
-
-------------------------------------------------------------------------
-
-## Features
-
--   Lightweight (pure Bash)
--   No background services needed
--   Works with `notify-send`
--   Prevents repeated notification spam
-
-------------------------------------------------------------------------
+---
 
 ## Requirements
 
--   Linux
--   `notify-send` (usually from `libnotify`)
--   Battery exposed at:
+- Linux with a battery at `/sys/class/power_supply/BAT0/`
+- `notify-send` - usually provided by `libnotify`
 
+> To check your battery path: `ls /sys/class/power_supply/`  
+> If it shows `BAT1`, update the path in the script accordingly.
 
-```
-    /sys/class/power_supply/BAT0/
-```
-Check with:
-```
-    ls /sys/class/power_supply/
-```
-------------------------------------------------------------------------
+---
 
 ## Installation
 
-Clone the repository:
+```bash
+git clone https://github.com/yourusername/i3-battery-notify.git
+cd i3-battery-notify
+chmod +x battery-notify.sh
 ```
-    git clone https://github.com/yourusername/i3-battery-notify.git
-    cd i3-battery-notify
-```
-Make the script executable:
-```
-    chmod +x battery-notify.sh
-```
-------------------------------------------------------------------------
+
+---
 
 ## Usage
 
-Run the script:
-```
-    ./battery-notify.sh
-```
-To start automatically with **i3**, add to your `~/.config/i3/config`:
-```
-    exec --no-startup-id ~/path/to/battery-notify.sh
-```
-------------------------------------------------------------------------
+Run manually to test:
 
-## How it Works
+```bash
+./battery-notify.sh
+```
 
-The script:
+### Automate with cron
 
-1.  Reads battery percentage from:
-```
-/sys/class/power_supply/BAT0/capacity
-```
-2.  Reads battery status from:
-```
-/sys/class/power_supply/BAT0/status
-```
-3.  If:
-```
-battery < 20%
-AND
-status = Discharging
-```
-it sends a **critical notification** using `notify-send`.
+To run the check every 2 minutes automatically:
 
-A flag prevents repeated notifications until the battery rises above the
-threshold or the charger is plugged in.
+```bash
+crontab -e
+```
 
-------------------------------------------------------------------------
+Add this line:
+
+```
+*/2 * * * * /path/to/battery-notify.sh
+```
+
+Cron runs independently of your i3 session, so it works reliably across reloads and restarts.
+
+---
 
 ## Customization
 
-Change the **battery threshold**:
+Change the threshold in `battery-notify.sh`:
+
+```bash
+if [[ "$STATUS" != "Charging" && "$CAPACITY" -lt 20 ]]; then
 ```
-if [ "$BAT" -lt 20 ]
-```
-Example for 15%:
-```
-if [ "$BAT" -lt 15 ]
-```
-Change the **check interval**:
-```
-sleep 120
-```
-Example for checking every minute:
-```
-sleep 60
-```
-------------------------------------------------------------------------
+
+Replace `20` with whatever percentage you prefer.
+
+---
 
 ## License
 
-This project is licensed under the MIT License.
-
-See the [LICENSE](LICENSE) file for details.
+MIT - see [LICENSE](LICENSE) for details.
